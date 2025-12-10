@@ -1,0 +1,234 @@
+name: SDK Auto-Update
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update even if version unchanged'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  check-for-updates:
+    name: Check for SDK Updates
+    runs-on: ubuntu-latest
+    outputs:
+      has_update: ${{ steps.check.outputs.has_update }}
+      current_version: ${{ steps.check.outputs.current_version }}
+      latest_version: ${{ steps.check.outputs.latest_version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install strands-agents strands-agents-tools httpx
+
+      - name: Check for updates
+        id: check
+        run: |
+          python agents/orchestrator.py check-version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-sdk:
+    name: Update SDK
+    runs-on: ubuntu-latest
+    needs: check-for-updates
+    if: needs.check-for-updates.outputs.has_update == 'true' || github.event.inputs.force_update == 'true'
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install strands-agents strands-agents-tools httpx
+          pip install -r backend/requirements.txt
+
+      - name: Run SDK Update Orchestrator
+        id: update
+        run: |
+          python agents/orchestrator.py update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION || 'us-east-1' }}
+
+      - name: Create Pull Request
+        if: steps.update.outputs.changes_made == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update strands-agents SDK to ${{ needs.check-for-updates.outputs.latest_version }}"
+          title: "chore: Update Strands SDK to ${{ needs.check-for-updates.outputs.latest_version }}"
+          body: |
+            ## Automated SDK Update
+
+            This PR updates the Strands Agents SDK from `${{ needs.check-for-updates.outputs.current_version }}` to `${{ needs.check-for-updates.outputs.latest_version }}`.
+
+            ### Changes
+            - Updated `backend/requirements.txt` with new SDK version
+            - Any breaking changes have been addressed (see commits)
+
+            ### Changelog
+            See [Strands SDK Releases](https://github.com/strands-agents/sdk-python/releases) for details.
+
+            ### Testing
+            - [ ] All existing tests pass
+            - [ ] New SDK features tested (if applicable)
+            - [ ] Docker build succeeds
+
+            ---
+            *This PR was automatically created by the SDK Update workflow.*
+          branch: sdk-update/${{ needs.check-for-updates.outputs.latest_version }}
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: update-sdk
+    if: always() && needs.update-sdk.result == 'success'
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: strands
+          POSTGRES_PASSWORD: strands
+          POSTGRES_DB: strands_gui_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout updated code
+        uses: actions/checkout@v4
+        with:
+          ref: sdk-update/${{ needs.check-for-updates.outputs.latest_version }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run all tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://strands:strands@localhost:5432/strands_gui_test
+          SECRET_KEY: test-secret-key-for-ci
+          DEBUG: "false"
+        run: |
+          cd backend
+          pytest tests/ -v --tb=short
+
+  auto-merge:
+    name: Auto-Merge PR
+    runs-on: ubuntu-latest
+    needs: [check-for-updates, run-tests]
+    if: always() && needs.run-tests.result == 'success'
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Enable auto-merge for PR
+        run: |
+          gh pr merge sdk-update/${{ needs.check-for-updates.outputs.latest_version }} \
+            --auto --squash --delete-branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [check-for-updates, update-sdk, run-tests]
+    if: failure()
+
+    steps:
+      - name: Create issue on failure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `SDK Update Failed - ${{ needs.check-for-updates.outputs.latest_version }}`;
+            const body = `
+            ## SDK Auto-Update Failure
+
+            The automated SDK update workflow has failed.
+
+            **Current Version:** ${{ needs.check-for-updates.outputs.current_version }}
+            **Target Version:** ${{ needs.check-for-updates.outputs.latest_version }}
+
+            **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Please review the logs and address any issues manually.
+
+            ### Possible Causes
+            - Breaking changes in the new SDK version
+            - Test failures
+            - Build issues
+
+            ### Action Required
+            1. Review the workflow logs
+            2. Check the [SDK changelog](https://github.com/strands-agents/sdk-python/releases)
+            3. Create a manual PR with necessary fixes
+
+            ---
+            *This issue was automatically created by the SDK Update workflow.*
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['bug', 'dependencies', 'automated']
+            });
