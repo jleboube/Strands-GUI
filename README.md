@@ -99,12 +99,72 @@ The application runs on port **58431** by default.
 | `DB_USER` | PostgreSQL username | `strands` |
 | `DB_PASSWORD` | PostgreSQL password | - |
 | `JWT_SECRET` | Secret key for JWT tokens | - |
+| `DOMAIN_NAME` | Custom domain name (e.g., `strands.example.com`) | - |
+| `USE_HTTPS` | Set to `true` if domain uses HTTPS | `false` |
 | `CORS_ORIGINS` | Allowed CORS origins | `http://localhost:58431` |
 | `AWS_ACCESS_KEY_ID` | AWS credentials for Bedrock | - |
 | `AWS_SECRET_ACCESS_KEY` | AWS credentials for Bedrock | - |
 | `OPENAI_API_KEY` | OpenAI API key | - |
 | `ANTHROPIC_API_KEY` | Anthropic API key | - |
 | `GEMINI_API_KEY` | Google Gemini API key | - |
+
+### Custom Domain Setup
+
+Strands GUI supports deployment with a custom domain name, making it easy to use with reverse proxies like Cloudflare Tunnels, Nginx, or Traefik.
+
+#### Using Cloudflare Tunnels
+
+1. Configure your `.env` file with the domain:
+```bash
+DOMAIN_NAME=strands.yourdomain.com
+USE_HTTPS=true
+```
+
+2. Start the application:
+```bash
+docker compose up -d --build
+```
+
+3. In your Cloudflare Tunnel configuration, point the domain to:
+   - **Service**: `http://localhost:58431`
+   - Or if running in Docker: `http://strands-gui-frontend:80`
+
+4. The application will automatically:
+   - Add your domain to the CORS allowed origins
+   - Accept requests from your custom domain
+
+#### Using Other Reverse Proxies
+
+For Nginx, Traefik, or other reverse proxies:
+
+1. Set the domain in `.env`:
+```bash
+DOMAIN_NAME=strands.yourdomain.com
+USE_HTTPS=true  # Set to true if your proxy handles SSL
+```
+
+2. Configure your reverse proxy to forward requests to `localhost:58431`
+
+3. Ensure WebSocket support is enabled for the `/api/ws` path
+
+Example Nginx configuration:
+```nginx
+server {
+    listen 443 ssl;
+    server_name strands.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:58431;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
 
 ## Usage
 
