@@ -223,7 +223,9 @@ export function APIReference() {
                           {endpoint.description}
                         </span>
                         {endpoint.auth && (
-                          <Lock className="h-4 w-4 text-muted-foreground" title="Requires authentication" />
+                          <span title="Requires authentication">
+                            <Lock className="h-4 w-4 text-muted-foreground" />
+                          </span>
                         )}
                       </div>
                     </div>
