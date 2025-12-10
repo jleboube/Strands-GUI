@@ -12,6 +12,11 @@ import { Tools } from '@/pages/Tools';
 import { APIKeys } from '@/pages/APIKeys';
 import { Settings } from '@/pages/Settings';
 import { SDKUpdate } from '@/pages/SDKUpdate';
+import { Documentation } from '@/pages/Documentation';
+import { APIReference } from '@/pages/APIReference';
+import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
+import { TermsOfService } from '@/pages/TermsOfService';
+import { License } from '@/pages/License';
 import { Loader2 } from 'lucide-react';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -58,6 +63,12 @@ export default function App() {
         path="/landing"
         element={<Landing />}
       />
+      {/* Public info pages */}
+      <Route path="/documentation" element={<Documentation />} />
+      <Route path="/api-reference" element={<APIReference />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/license" element={<License />} />
       <Route
         path="/login"
         element={
