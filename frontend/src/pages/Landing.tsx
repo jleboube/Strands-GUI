@@ -105,9 +105,15 @@ export function Landing() {
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild className="text-lg px-8">
+                  <a href="https://github.com/jleboube/Strands-GUI" target="_blank" rel="noopener noreferrer">
+                    <Github className="mr-2 h-5 w-5" />
+                    Strands GUI Repo
+                  </a>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="text-lg px-8">
                   <a href="https://github.com/strands-agents" target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-5 w-5" />
-                    View on GitHub
+                    Strands SDK
                   </a>
                 </Button>
               </div>
@@ -433,8 +439,15 @@ export function Landing() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="text-lg px-8 bg-transparent border-white text-white hover:bg-white/10">
+                <a href="https://github.com/jleboube/Strands-GUI" target="_blank" rel="noopener noreferrer">
+                  <Star className="mr-2 h-5 w-5" />
+                  Star Strands GUI
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" asChild className="text-lg px-8 bg-transparent border-white text-white hover:bg-white/10">
                 <a href="https://github.com/strands-agents" target="_blank" rel="noopener noreferrer">
-                  Star on GitHub
+                  <Github className="mr-2 h-5 w-5" />
+                  Strands SDK
                 </a>
               </Button>
             </div>
