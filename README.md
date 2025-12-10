@@ -1,3 +1,5 @@
+<div align="center">
+    
 # Strands GUI
 
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)
@@ -12,6 +14,21 @@
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/muscl3n3rd)
 
 A comprehensive web-based GUI for the [Strands Agents SDK](https://github.com/strands-agents/sdk-python) that allows users to build, configure, and run AI agents without writing code.
+
+[Demo](https://strands.ai-sherpa.rocks) • [Screenshots](#screenshots) • [Features](#features) • [Quick Start](#quick-start) • [API Docs](#api-documentation)
+
+</div>
+
+## Screenshots
+
+Strands GUI Landing Page
+
+![Alt text](docs/st1.png "Strands GUI Landing Page")
+
+![Alt text](docs/st2.png "Strands GUI Landing Page")
+
+![Alt text](docs/st3.png "Strands GUI Landing Page")
+
 
 ## Features
 
