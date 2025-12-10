@@ -97,25 +97,27 @@ export function Landing() {
               </p>
 
               {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild className="text-lg px-8">
+              <div className="flex flex-col gap-3">
+                <Button size="lg" asChild className="text-lg px-8 w-full sm:w-auto">
                   <Link to="/register">
                     Start Building Free
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="text-lg px-8">
-                  <a href="https://github.com/jleboube/Strands-GUI" target="_blank" rel="noopener noreferrer">
-                    <Github className="mr-2 h-5 w-5" />
-                    Strands GUI Repo
-                  </a>
-                </Button>
-                <Button size="lg" variant="outline" asChild className="text-lg px-8">
-                  <a href="https://github.com/strands-agents" target="_blank" rel="noopener noreferrer">
-                    <Github className="mr-2 h-5 w-5" />
-                    Strands SDK
-                  </a>
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button size="lg" variant="outline" asChild className="text-lg px-6 w-full sm:w-auto">
+                    <a href="https://github.com/jleboube/Strands-GUI" target="_blank" rel="noopener noreferrer">
+                      <Github className="mr-2 h-5 w-5 flex-shrink-0" />
+                      <span className="truncate">Strands GUI Repo</span>
+                    </a>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild className="text-lg px-6 w-full sm:w-auto">
+                    <a href="https://github.com/strands-agents" target="_blank" rel="noopener noreferrer">
+                      <Github className="mr-2 h-5 w-5 flex-shrink-0" />
+                      <span className="truncate">Strands SDK</span>
+                    </a>
+                  </Button>
+                </div>
               </div>
 
               {/* Quick Stats */}
@@ -431,25 +433,27 @@ export function Landing() {
             <p className="text-xl text-white/80 max-w-2xl mx-auto mb-8">
               Join thousands of developers who are building the future with intelligent AI agents.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" asChild className="text-lg px-8">
+            <div className="flex flex-col gap-3 items-center max-w-md mx-auto">
+              <Button size="lg" variant="secondary" asChild className="text-lg px-8 w-full sm:w-auto">
                 <Link to="/register">
                   Get Started Free
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="text-lg px-8 bg-transparent border-white text-white hover:bg-white/10">
-                <a href="https://github.com/jleboube/Strands-GUI" target="_blank" rel="noopener noreferrer">
-                  <Star className="mr-2 h-5 w-5" />
-                  Star Strands GUI
-                </a>
-              </Button>
-              <Button size="lg" variant="outline" asChild className="text-lg px-8 bg-transparent border-white text-white hover:bg-white/10">
-                <a href="https://github.com/strands-agents" target="_blank" rel="noopener noreferrer">
-                  <Github className="mr-2 h-5 w-5" />
-                  Strands SDK
-                </a>
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <Button size="lg" variant="outline" asChild className="text-lg px-6 bg-transparent border-white text-white hover:bg-white/10 w-full sm:w-auto">
+                  <a href="https://github.com/jleboube/Strands-GUI" target="_blank" rel="noopener noreferrer">
+                    <Star className="mr-2 h-5 w-5 flex-shrink-0" />
+                    <span className="truncate">Star Strands GUI</span>
+                  </a>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="text-lg px-6 bg-transparent border-white text-white hover:bg-white/10 w-full sm:w-auto">
+                  <a href="https://github.com/strands-agents" target="_blank" rel="noopener noreferrer">
+                    <Github className="mr-2 h-5 w-5 flex-shrink-0" />
+                    <span className="truncate">Strands SDK</span>
+                  </a>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
