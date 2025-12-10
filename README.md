@@ -1,5 +1,5 @@
 <div align="center">
-    
+
 # Strands GUI
 
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)
@@ -24,9 +24,7 @@ A comprehensive web-based GUI for the [Strands Agents SDK](https://github.com/st
 Strands GUI Landing Page
 
 ![Alt text](docs/st1.png "Strands GUI Landing Page")
-
 ![Alt text](docs/st2.png "Strands GUI Landing Page")
-
 ![Alt text](docs/st3.png "Strands GUI Landing Page")
 
 
